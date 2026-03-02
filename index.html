@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>五小★ドリル</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts (M PLUS Rounded 1c) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="icon" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* 北欧風カラーパレットとフォントの設定 */
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background-color: #F4F1DE; /* クリーム（コルクボード風の背景） */
+      /* コルクボードのようなテクスチャをうっすら追加（CSSグラデーション） */
+      background-image: 
+        radial-gradient(#e5e0c8 15%, transparent 16%),
+        radial-gradient(#e5e0c8 15%, transparent 16%);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+    }
+    
+    /* マスキングテープ風の装飾用クラス */
+    .masking-tape {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width: 80px;
+      height: 25px;
+      background-color: rgba(255, 255, 255, 0.6);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      z-index: 10;
+    }
+    .tape-terracotta { background-color: rgba(224, 122, 95, 0.7); }
+    .tape-sage { background-color: rgba(129, 178, 154, 0.7); }
+    .tape-blue { background-color: rgba(61, 64, 91, 0.5); }
+    .tape-mustard { background-color: rgba(242, 204, 143, 0.8); }
+
+    /* アニメーション用 */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spin 3s linear infinite;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // ==========================================
+    // アプリのデータ定義（将来増やす場合はここに追加）
+    // ==========================================
+    const appData = [
+      {
+        id: 1,
+        title: 'カンジノート',
+        grade: '1〜6ねんせい',
+        description: '毎日コツコツ！漢字の練習をしよう。',
+        url: 'https://yanyan-teacher.github.io/kanji-note/', // ※実際のアプリのURLに変更してください
+        icon: 'pencil',
+        color: '#E07A5F', // テラコッタ
+        tapeClass: 'tape-terracotta'
+      },
+      {
+        id: 2,
+        title: 'サンスウノート',
+        grade: '1〜6ねんせい',
+        description: 'すばやく正確に計算する力をつけよう！',
+        url: 'https://yanyan-teacher.github.io/sansu-note/', // ※実際のアプリのURLに変更してください
+        icon: 'calculator',
+        color: '#81B29A', // セージグリーン
+        tapeClass: 'tape-sage'
+      },
+      // 例: 増やす場合は以下のように追加します
+      // {
+      //   id: 3,
+      //   title: 'えいごのゲーム',
+      //   grade: '3〜6ねんせい',
+      //   description: 'ゲーム感覚で楽しく英語を学ぼう！',
+      //   url: 'https://example.com/english',
+      //   icon: 'globe',
+      //   color: '#3D405B', // ブルーグレー
+      //   tapeClass: 'tape-blue'
+      // }
+    ];
+
+    // ==========================================
+    // アイコンコンポーネント
+    // ==========================================
+    const Icon = ({ name, size = 24, color = "currentColor", className = "" }) => {
+      useEffect(() => {
+        lucide.createIcons();
+      }, [name]);
+      
+      return <i data-lucide={name} width={size} height={size} stroke={color} className={className}></i>;
+    };
+
+    // ==========================================
+    // アプリカードコンポーネント（付箋風）
+    // ==========================================
+    const AppCard = ({ app }) => {
+      // カードを押した時のアクション（別タブで開く）
+      const handleClick = () => {
+        window.open(app.url, '_blank');
+      };
+
+      return (
+        <div 
+          onClick={handleClick}
+          className="relative bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer flex flex-col items-center text-center group"
+          style={{ borderTop: `4px solid ${app.color}` }}
+        >
+          {/* マスキングテープ装飾 */}
+          <div className={`masking-tape ${app.tapeClass}`}></div>
+          
+          {/* アイコン部分（丸い背景） */}
+          <div 
+            className="w-20 h-20 rounded-full flex items-center justify-center mb-4 text-white shadow-inner"
+            style={{ backgroundColor: app.color }}
+          >
+            <Icon name={app.icon} size={40} />
+          </div>
+
+          {/* タイトルと説明 */}
+          <h2 className="text-xl font-bold text-gray-800 mb-2" style={{ color: '#3D405B' }}>
+            {app.title}
+          </h2>
+          <span className="text-xs font-bold px-2 py-1 rounded bg-gray-100 text-gray-600 mb-3">
+            たいしょう: {app.grade}
+          </span>
+          <p className="text-sm text-gray-600 flex-grow">
+            {app.description}
+          </p>
+
+          {/* アクセスボタン */}
+          <button 
+            className="mt-4 px-6 py-2 rounded-full text-white font-bold transition-colors w-full"
+            style={{ backgroundColor: app.color }}
+          >
+            ひらく
+          </button>
+        </div>
+      );
+    };
+
+    // ==========================================
+    // メインアプリケーション
+    // ==========================================
+    const App = () => {
+      const [isLoading, setIsLoading] = useState(true);
+
+      // 初期ローディングのシミュレーション（Reactマウント時のちらつき防止）
+      useEffect(() => {
+        const timer = setTimeout(() => {
+          setIsLoading(false);
+          // アイコンの初期化
+          requestAnimationFrame(() => {
+            lucide.createIcons();
+          });
+        }, 500); // 0.5秒だけローディング表示
+        return () => clearTimeout(timer);
+      }, []);
+
+      // ローディング画面
+      if (isLoading) {
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center">
+            <div className="w-16 h-16 border-4 border-[#F4F1DE] border-t-[#E07A5F] rounded-full animate-spin"></div>
+            <p className="mt-4 text-[#3D405B] font-bold animate-pulse">じゅんびちゅう...</p>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen p-4 md:p-8">
+          
+          {/* ヘッダー部分（黒板風） */}
+          <header className="max-w-4xl mx-auto mb-10">
+            <div className="bg-[#3D405B] rounded-xl p-6 md:p-8 shadow-lg border-8 border-[#2b2d42] relative overflow-hidden">
+              {/* 黒板のチョーク粉のようなテクスチャ（擬似要素の代わり） */}
+              <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIi8+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMwMDAiLz4KPC9zdmc+')]"></div>
+              
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <div className="flex items-center gap-3 mb-2">
+                  <Icon name="backpack" size={32} color="#F2CC8F" />
+                  <h1 className="text-3xl md:text-4xl font-bold text-white tracking-widest" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+                    五小★ドリル
+                  </h1>
+                  <Icon name="star" size={32} color="#F2CC8F" />
+                </div>
+                <p className="text-[#F4F1DE] text-sm md:text-base mt-2">
+                  いろいろな がくしゅうアプリが あつまる ばしょです。<br/>
+                  きょうも たのしく まなぼう！
+                </p>
+              </div>
+            </div>
+          </header>
+
+          {/* アプリ一覧（コルクボード風エリア） */}
+          <main className="max-w-4xl mx-auto">
+            {/* ピンの装飾（左上と右上） */}
+            <div className="relative">
+              <div className="absolute -top-3 -left-3 w-6 h-6 rounded-full bg-red-500 shadow-md border border-red-700 z-20 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full bg-white opacity-60 absolute top-1 left-1"></div>
+              </div>
+              <div className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-blue-500 shadow-md border border-blue-700 z-20 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full bg-white opacity-60 absolute top-1 left-1"></div>
+              </div>
+
+              {/* グリッドレイアウトでカードを配置 */}
+              <div className="bg-[#e8e4cf] p-6 md:p-8 rounded-lg shadow-inner border border-[#d4d0bc]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+                  {appData.map(app => (
+                    <AppCard key={app.id} app={app} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </main>
+          
+          {/* フッター */}
+          <footer className="mt-12 text-center text-[#3D405B] text-sm font-bold opacity-70">
+            <p>あわてず、自分のペースですすめよう！</p>
+          </footer>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
