@@ -96,13 +96,42 @@
       }
     ];
 
-    // ランク判定ロジック
+    // 20段階のランクデータ
+    const rankData = [
+      { level: 1, min: 0, title: 'みならい タンケンカ', color: '#81B29A' },
+      { level: 2, min: 10, title: 'かけだしの レンジャー', color: '#E07A5F' },
+      { level: 3, min: 30, title: 'がんばる チャレンジャー', color: '#3D405B' },
+      { level: 4, min: 100, title: 'いっぱしの マイスター', color: '#F2CC8F' },
+      { level: 5, min: 300, title: 'ゆめみる トラベラー', color: '#81B29A' },
+      { level: 6, min: 800, title: 'のびざかりの クリエイター', color: '#E07A5F' },
+      { level: 7, min: 2000, title: 'ちえの ぼうけんしゃ', color: '#3D405B' },
+      { level: 8, min: 5000, title: 'ひらめきの ナビゲーター', color: '#F2CC8F' },
+      { level: 9, min: 10000, title: 'はなまる キャプテン', color: '#81B29A' },
+      { level: 10, min: 25000, title: 'かがやく エース', color: '#E07A5F' },
+      { level: 11, min: 50000, title: 'ゆうきの ヒーロー', color: '#3D405B' },
+      { level: 12, min: 100000, title: 'きぼうの パイオニア', color: '#F2CC8F' },
+      { level: 13, min: 250000, title: 'みらいの プロフェッショナル', color: '#81B29A' },
+      { level: 14, min: 500000, title: 'すばらしき エキスパート', color: '#E07A5F' },
+      { level: 15, min: 1000000, title: 'たのもしい リーダー', color: '#3D405B' },
+      { level: 16, min: 2000000, title: 'まぼろしの マスター', color: '#F2CC8F' },
+      { level: 17, min: 4000000, title: 'きせきの レジェンド', color: '#81B29A' },
+      { level: 18, min: 6000000, title: 'むてきの チャンピオン', color: '#E07A5F' },
+      { level: 19, min: 8000000, title: 'ぎんがの だいスター', color: '#3D405B' },
+      { level: 20, min: 10000000, title: 'むげんの ユニバース', color: '#F2CC8F' }
+    ];
+
+    // スコアから現在のランク情報を計算する関数
     const getRankInfo = (score) => {
-      if (score < 100) return { level: 1, title: 'みならい タンケンカ', next: 100, min: 0, color: '#81B29A' };
-      if (score < 500) return { level: 2, title: 'かけだしの レンジャー', next: 500, min: 100, color: '#E07A5F' };
-      if (score < 2000) return { level: 3, title: 'いっぱしの マイスター', next: 2000, min: 500, color: '#3D405B' };
-      if (score < 10000) return { level: 4, title: 'はなまる ナビゲーター', next: 10000, min: 2000, color: '#F2CC8F' };
-      return { level: 5, title: 'でんせつの スター', next: 10000, min: 10000, color: '#E07A5F' };
+      for (let i = 0; i < rankData.length; i++) {
+        // 最終レベルに到達した場合
+        if (i === rankData.length - 1) {
+          return { ...rankData[i], next: rankData[i].min };
+        }
+        // 次のレベルの基準点に達していない場合、現在のレベルを返す
+        if (score < rankData[i + 1].min) {
+          return { ...rankData[i], next: rankData[i + 1].min };
+        }
+      }
     };
 
     const Icon = ({ name, size = 24, color = "currentColor", className = "" }) => {
@@ -114,7 +143,6 @@
 
     const AppCard = ({ app }) => {
       const handleClick = () => {
-        // 新しいタブで開かず、同じタブでリンク先へ遷移するように変更
         window.location.href = app.url;
       };
 
@@ -154,7 +182,6 @@
       const [isLoading, setIsLoading] = useState(true);
       const [totalScore, setTotalScore] = useState(0);
 
-      // ローカルストレージからスコアを読み込む
       const loadScore = () => {
         const score = parseInt(localStorage.getItem('gogo_drill_score') || '0', 10);
         setTotalScore(score);
@@ -162,7 +189,6 @@
 
       useEffect(() => {
         loadScore();
-        // 別タブでアプリをプレイして戻ってきた時にスコアを更新する
         window.addEventListener('focus', loadScore);
         
         const timer = setTimeout(() => {
@@ -186,7 +212,8 @@
       }
 
       const rankInfo = getRankInfo(totalScore);
-      const isMaxRank = rankInfo.level === 5;
+      // 動的にMAXレベル（現在は20）を判定
+      const isMaxRank = rankInfo.level === rankData.length;
       const progressPercent = isMaxRank ? 100 : ((totalScore - rankInfo.min) / (rankInfo.next - rankInfo.min)) * 100;
 
       return (
@@ -215,7 +242,7 @@
             <div className="bg-white rounded-xl p-5 shadow-md border-2 border-gray-200 relative">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-inner border-4 border-white" style={{ backgroundColor: rankInfo.color }}>
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-inner border-4 border-white" style={{ backgroundColor: rankInfo.color }}>
                     Lv.{rankInfo.level}
                   </div>
                   <div>
@@ -237,7 +264,7 @@
                 <div className="flex justify-between text-xs font-bold text-gray-500 mb-1">
                   <span>{rankInfo.min.toLocaleString()} てん</span>
                   <span>{isMaxRank ? 'MAX!' : `つぎのランクまで あと ${(rankInfo.next - totalScore).toLocaleString()} てん`}</span>
-                  <span>{rankInfo.next.toLocaleString()} てん</span>
+                  <span>{isMaxRank ? '10,000,000 てん' : `${rankInfo.next.toLocaleString()} てん`}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-4 shadow-inner overflow-hidden">
                   <div 
