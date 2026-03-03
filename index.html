@@ -114,7 +114,8 @@
 
     const AppCard = ({ app }) => {
       const handleClick = () => {
-        window.open(app.url, '_blank');
+        // 新しいタブで開かず、同じタブでリンク先へ遷移するように変更
+        window.location.href = app.url;
       };
 
       return (
